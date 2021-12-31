@@ -1,35 +1,54 @@
-# This code use the sklearn package to apply a decission tree method onto the 
-# gripper data base.
+# This code is based on the sklearn package
+# Apart from implementing the standard Random Forest Classifier based on the 
+# Decision Tree from sklearn, the code further unfold the trees to compute the
+# Design rules of the target. 
 
 from sklearn import model_selection
 from sklearn.tree import DecisionTreeClassifier
 from scipy import stats
 import numpy as np
 
-# define the class for achieving the tree method
+# The class is called TreeMethod
 class TreeMethod():
     
+    # The following methods are used for parallely solving the precision for
+    # Grid search of the hyperparameters
+    def __init__(self, i=0,j=0):
+        self.i=i
+        self.j=j
+        self.dep=[8,12,16,20,24,28,32]
+        self.treeNum=[20,40,60,100,200]
+        
+    def runParellel(self,  X_train, Y_train, featureName, X_test, Y_test):
+        
+        i=self.i
+        j=self.j
+        
+        self.setParameter(alpha=0.0001, depth=self.dep[i], num_tree=self.treeNum[j])
+        self.train(X_train, Y_train, featureName)
+        self.computeRule(X_train, Y_train, ruleNumber=1)
+        self.testRule(X_test,Y_test)
+        
+        # tree.printRule()  
+        Pre = (self.finalRuleTestPrecision[0])
+        Score = (self.finalRuleScore[0])
+        
+        # Use the trandom forest to predict the results of the testing set
+        Y_pred=self.predict(X_test)
+        
+        # calculate the accruacy
+        accuratePredict = sum(Y_pred==Y_test)            
+        Acc = accuratePredict / len(Y_pred)
+
+        return [i,j, Acc, Pre, Score]
+ 
     
     
     ###########################################################################
-    # The following method input the data
-    ########################################################################### 
-    
-    def setData(self,X_train, Y_train, featureName):
-        self.X_train=X_train
-        self.Y_train=Y_train
-        self.featureNum=len(X_train[0,:])
-        self.classNum=int(max(Y_train))+1
-        self.featureName=featureName
-        
-        
-        
-        
-    ###########################################################################
-    # The following method set the parameters for the tree method
+    # The following method set the parameters for the decision trees
     ###########################################################################     
-        
-    def setParameter(self,alpha=0.0001,depth=8,num_tree=10):
+    
+    def setParameter(self,alpha=0.0001,depth=20,num_tree=100):
         self.alpha=alpha
         self.depth=depth
         self.num_tree=num_tree      
@@ -38,40 +57,44 @@ class TreeMethod():
             if alpha==0:
                  self.treeList.append(DecisionTreeClassifier(
                                  max_depth=depth,
-                                 max_features=self.featureNum,
+                                 min_samples_leaf=2,
+                                 min_samples_split=4,
                                  random_state=i,
-                                 criterion="gini",
+                                 criterion="entropy",
                                  splitter='best',
                                  class_weight='balanced'))
             else: 
                 self.treeList.append(DecisionTreeClassifier(
                                  ccp_alpha=alpha,
                                  max_depth=depth,
-                                 max_features=self.featureNum,
+                                 min_samples_leaf=2,
+                                 min_samples_split=4,
                                  random_state=i,
-                                 criterion="gini",
+                                 criterion="entropy",
                                  splitter='best',
                                  class_weight='balanced'))
+                
             # Here the random state is fixed for demonstration purpose. 
-            # In real practice the random state need not be fixed.
-            
-            
-            
+            # In real practice the random state need not be fixed.            
             
     ###########################################################################
-    # The following method train the tree method
+    # The following method train the individual decision trees
     ########################################################################### 
         
-    def train(self):
+    def train(self,X_train,Y_train,featureName):
+        
+        self.featureNum=len(X_train[0,:])
+        self.featureName=featureName
+        
         # Here we need to use the random sub data set for different trees
         for i in range(self.num_tree):
             X_subtrain, X_remain, Y_subtrain, Y_remain = model_selection.train_test_split(
-                        self.X_train, self.Y_train, test_size = 0.3,random_state=i)
+                        X_train, Y_train, test_size = 0.5, random_state=i)
+            
             self.treeList[i].fit(X_subtrain, Y_subtrain)
             
-        
-    
-    
+            # Here we use random subsets to encourage generating different 
+            # trees, which helps to promote the performance of the algorithm
     
     ###########################################################################
     # The following method will gives the predict label class
@@ -88,267 +111,254 @@ class TreeMethod():
         # The final prediction is the mode of different trees
         Y_pred=stats.mode(Y_pred_mat)
         return np.squeeze(Y_pred.mode)
-        
 
+
+    ###########################################################################
+    # The following method compute the rules for the target design. We first
+    # compute the precision, recall, and data size associated with each rules.
+    # Then we eliminate bad rules that does not meet the min data requirement 
+    # and min precision requirement. Finally, we select the rules based on the 
+    # F-scroe.
+    ###########################################################################      
+            
+    def computeRule(self,
+                   X_train,
+                   Y_train,
+                   ruleNumber=1,
+                   selectedClass=1,
+                   minData=10,
+                   minPrecision=0.9,
+                   beta=0.2):
+        
+        # First run the analysis to collect all rules
+        self.collectRule()
+        
+        # How many rules we want to select
+        self.ruleNumber=ruleNumber        
+       
+        tempRule=self.collectedRule
+        ruleNum=np.size(tempRule,axis=0) 
+        
+        # We are interested in the precision and recall of the rules
+        # in addition to the recall, knowing how many data fits the rule 
+        # discription is also helpful so we also track it.
+        self.ruleTrainPrecision=np.zeros((ruleNum))
+        self.ruleTrainRecall=np.zeros((ruleNum))
+        self.ruleTrainSize=np.zeros((ruleNum))
+        
+        
+        for k in range(ruleNum):
+            trainDataFitRules=np.ones(np.size(Y_train))                          
+            for p in range(self.featureNum):
+                if tempRule[k,p,0]!=0:
+                    trainDataFitRules=np.multiply(trainDataFitRules,
+                        (X_train[:,p]<tempRule[k,p,0]))
+                if tempRule[k,p,1]!=0:
+                    trainDataFitRules=np.multiply(trainDataFitRules,
+                        (X_train[:,p]>tempRule[k,p,1]))
+        
+            # print(testDataFitRules)
+            if sum(trainDataFitRules)!=0:
+                TP=np.multiply (trainDataFitRules , (selectedClass==Y_train))                        
+                self.ruleTrainPrecision[k]=sum(TP)/sum(trainDataFitRules)
+                self.ruleTrainRecall[k]=sum(TP)/sum((selectedClass==Y_train))
+                self.ruleTrainSize[k]=sum(trainDataFitRules)
+                
+        # AFter we have computed the precision, recall, and data size   
+        # next step is to eliminate bad rules by deleting the rules
+        # that does not meet the minimum threshold
+        
+        self.selectedRule={}        
+        
+        checkVec1=(self.ruleTrainSize>=minData)
+        checkVec2=(self.ruleTrainPrecision>=minPrecision)
+        
+        checkVec=checkVec1*checkVec2
+        
+        deleteIndex=[]
+        for q in range(len(checkVec)):
+            if checkVec[q]==0:
+                deleteIndex.append(q)
+                
+        tempRule=np.delete(tempRule, deleteIndex, axis=0)
+        
+        self.ruleTrainSize=np.delete(self.ruleTrainSize,deleteIndex,axis=0)
+        self.ruleTrainPrecision=np.delete(self.ruleTrainPrecision,deleteIndex,axis=0)
+        self.ruleTrainRecall=np.delete(self.ruleTrainRecall,deleteIndex,axis=0)        
+       
+        self.selectedRule=tempRule
+        
+        if np.linalg.norm(tempRule)==0:
+            print('Cannot find available rules. Please relax cretarion.')
+                            
+        # Next we select the rules based on their score             
+        self.finalRule={}
+               
+        # Here we compute the F-score of rules
+        self.ruleScore=(1+beta*beta)*self.ruleTrainPrecision*self.ruleTrainRecall/(self.ruleTrainPrecision*beta*beta+self.ruleTrainRecall)   
+        
+        # Here we rank the rules based on F-scores
+        sequenceCount=np.argsort(-self.ruleScore)     
+        
+        sizeMat=np.shape(tempRule)            
+        self.finalRule=np.zeros((ruleNumber,sizeMat[1],2))
+        self.finalRuleTrainSize=np.zeros(ruleNumber)
+        self.finalRuleTrainPrecision=np.zeros(ruleNumber)
+        self.finalRuleTrainRecall=np.zeros(ruleNumber)
+        self.finalRuleScore=np.zeros(ruleNumber)
+        
+        for j in range(ruleNumber):
+            self.finalRule[j,:,:]=tempRule[sequenceCount[j],:,:]
+            self.finalRuleTrainSize[j]=self.ruleTrainSize[sequenceCount[j]]
+            self.finalRuleTrainPrecision[j]=self.ruleTrainPrecision[sequenceCount[j]]
+            self.finalRuleTrainRecall[j]=self.ruleTrainRecall[sequenceCount[j]]
+            self.finalRuleScore[j]=self.ruleScore[sequenceCount[j]]
+        
     
     
     ###########################################################################
     # The following method will select rules. The rules selected should be 
     # statistically significant meaning that the branch should contain more 
     # data points than the specified threshold.
-    ###########################################################################                      
+    ###########################################################################                
     
-    
-    def printRuleForClass(self,selectedClass):
-        
-        dicIndex=str(selectedClass)            
-        tempRule=self.finalRule[dicIndex]
+    def printRule(self):  
         
         for i in range(self.ruleNumber):
-
-            print('training reliability', 
-                  self.ruleTrainReliability[selectedClass,i])
+            print('training precision', 
+                  self.finalRuleTrainPrecision[i])
             print('training data size', 
-                  self.ruleTrainSize[selectedClass,i])
-            print('testing reliability' ,
-                  self.ruleTestReliability[selectedClass,i])
+                  self.finalRuleTrainSize[i])
+            print('testing precision' ,
+                  self.finalRuleTestPrecision[i])
             print('testing data size', 
-                  self.ruleTestSize[selectedClass,i])
+                  self.finalRuleTestSize[i])
 
             tempString = ''   
                     
             for j in range(self.featureNum):
                 
-                if tempRule[i,j,0]!=0:
+                if self.finalRule[i,j,0]!=0:
                     tempString+= str(self.featureName[j])
                     tempString+='<'
-                    tempString+=str(tempRule[i,j,0])
+                    tempString+=str(self.finalRule[i,j,0])
                     tempString+='\n'
-                if tempRule[i,j,1]!=0:
+                if self.finalRule[i,j,1]!=0:
                     tempString+= str(self.featureName[j])
                     tempString+='>='
-                    tempString+=str(tempRule[i,j,1])
+                    tempString+=str(self.finalRule[i,j,1])
                     tempString+='\n'   
                     
             print(tempString)  
+            
+            
+    ###########################################################################
+    # The following method willfind the list of data that fit rules
+    ###########################################################################      
+            
+    def findDataFitFinalRule(self,X_train,Y_train,X_test,Y_test):
+        
+        self.dataFitFinalRule_TrainData={}
+        self.dataFitFinalRule_TestData={}
+        
+        for j in range(self.ruleNumber):
+                    
+            trainDataFitRules=np.ones(np.size(Y_train))
+            for p in range(self.featureNum):
+                if self.finalRule[j,p,0]!=0:
+                    trainDataFitRules=np.multiply(trainDataFitRules,
+                        (X_train[:,p]<self.finalRule[j,p,0]))
+                if self.finalRule[j,p,1]!=0:
+                    trainDataFitRules=np.multiply(trainDataFitRules,
+                        (X_train[:,p]>self.finalRule[j,p,1]))
+                        
+            self.dataFitFinalRule_TrainData[str(j)]=trainDataFitRules             
+                    
+            testDataFitRules=np.ones(np.size(Y_test))
+            for p in range(self.featureNum):
+                if self.finalRule[j,p,0]!=0:
+                    testDataFitRules=np.multiply(testDataFitRules,
+                        (X_test[:,p]<self.finalRule[j,p,0]))
+                if self.finalRule[j,p,1]!=0:
+                    testDataFitRules=np.multiply(testDataFitRules,
+                        (X_test[:,p]>self.finalRule[j,p,1]))
+            
+            self.dataFitFinalRule_TestData[str(j)]=testDataFitRules
 
         
     
     ###########################################################################
     # The following method will perform testing of the rules. It computes 
-    # the reliability of the rule for both training and testing data set and 
+    # the precision of the rule for both training and testing data set and 
     # check how many data are associated with a rule set. 
     ###########################################################################      
             
-    def testRule(self,X_test,Y_test):
-        # select rules based on reliability
-        self.ruleTrainReliability=np.zeros((self.classNum,self.ruleNumber))
-        self.ruleTestReliability=np.zeros((self.classNum,self.ruleNumber))
-        self.ruleTrainSize=np.zeros((self.classNum,self.ruleNumber))
-        self.ruleTestSize=np.zeros((self.classNum,self.ruleNumber))
+    def testRule(self,X_test,Y_test,selectedClass=1):
+        # Compute the rule precision and robostness
+        self.finalRuleTestPrecision=np.zeros(self.ruleNumber)
+        self.finalRuleTestRecall=np.zeros(self.ruleNumber)        
+        self.finalRuleTestSize=np.zeros(self.ruleNumber)
         
-        for i in range(self.classNum):
-            dicIndex=str(i)            
-            tempRule=self.finalRule[dicIndex]
+        # We also recompute the training precision using the entire training 
+        # data rather than using the 10 subsets                        
+        tempRule=self.finalRule
+        
+        for j in range(self.ruleNumber):
+                    
+            testDataFitRules=np.ones(np.size(Y_test))
+            for p in range(self.featureNum):
+                if tempRule[j,p,0]!=0:
+                    #print(testDataFitRules)
+                    testDataFitRules=np.multiply(testDataFitRules,
+                        (X_test[:,p]<tempRule[j,p,0]))
+                    #print(testDataFitRules)
+                if tempRule[j,p,1]!=0:
+                    testDataFitRules=np.multiply(testDataFitRules,
+                        (X_test[:,p]>tempRule[j,p,1]))
             
-            for j in range(self.ruleNumber):
-                        
-                testDataFitRules=np.ones(np.size(self.Y_train))
-                for p in range(self.featureNum):
-                    if tempRule[j,p,0]!=0:
-                        #print(testDataFitRules)
-                        testDataFitRules=np.multiply(testDataFitRules,
-                            (self.X_train[:,p]<tempRule[j,p,0]))
-                        #print(testDataFitRules)
-                    if tempRule[j,p,1]!=0:
-                        testDataFitRules=np.multiply(testDataFitRules,
-                            (self.X_train[:,p]>tempRule[j,p,1]))
-                
-                # print(testDataFitRules)
-                if sum(testDataFitRules)!=0:
-                    tempY=np.multiply (testDataFitRules , (i==self.Y_train))                        
-                    self.ruleTrainReliability[i,j]=sum(tempY)/sum(testDataFitRules)
-                    self.ruleTrainSize[i,j]=sum(testDataFitRules)
-                    # print(sum(tempY)/sum(testDataFitRules))
-                        
-                testDataFitRules=np.ones(np.size(Y_test))
-                for p in range(self.featureNum):
-                    if tempRule[j,p,0]!=0:
-                        #print(testDataFitRules)
-                        testDataFitRules=np.multiply(testDataFitRules,
-                            (X_test[:,p]<tempRule[j,p,0]))
-                        #print(testDataFitRules)
-                    if tempRule[j,p,1]!=0:
-                        testDataFitRules=np.multiply(testDataFitRules,
-                            (X_test[:,p]>tempRule[j,p,1]))
-                
-                # print(testDataFitRules)
-                if sum(testDataFitRules)!=0:
-                    tempY=np.multiply (testDataFitRules , (i==Y_test))                        
-                    self.ruleTestReliability[i,j]=sum(tempY)/sum(testDataFitRules)
-                    self.ruleTestSize[i,j]=sum(testDataFitRules)
-                    # print(sum(tempY)/sum(testDataFitRules))
+            # print(testDataFitRules)
+            if sum(testDataFitRules)!=0:
+                TP=np.multiply (testDataFitRules , (selectedClass==Y_test))                        
+                self.finalRuleTestPrecision[j]=sum(TP)/sum(testDataFitRules)                
+                self.finalRuleTestRecall[j]=sum(TP)/sum(selectedClass==Y_test)
+                self.finalRuleTestSize[j]=sum(testDataFitRules)
 
 
-
-    ###########################################################################
-    # The following method will perform selection of the rules. It computes 
-    # the reliability of the rule using the training data, and select the rules 
-    # that are statistically significant
-    ###########################################################################      
-            
-    def selectRule(self,thresholdReliability=0.9,
-                   thresholdDataNum=20, 
-                   ruleNumber=3):
-        
-        self.ruleNumber=ruleNumber
-        
-        # select rules based on reliability
-        self.ruleTrainReliability={}
-        self.ruleTrainSize={}
-        
-        for i in range(self.classNum):
-            dicIndex=str(i)
-            tempRule=self.collectedRule[dicIndex]
-            ruleNum=np.size(tempRule,axis=0) 
-            ruleTrainReliability=np.zeros(ruleNum)
-            ruleTrainSize=np.zeros(ruleNum)
-            
-            for k in range(ruleNum):
-                testDataFitRules=np.ones(np.size(self.Y_train))
-                for p in range(self.featureNum):
-                    if tempRule[k,p,0]!=0:
-                        #print(testDataFitRules)
-                        testDataFitRules=np.multiply(testDataFitRules,
-                            (self.X_train[:,p]<tempRule[k,p,0]))
-                        #print(testDataFitRules)
-                    if tempRule[k,p,1]!=0:
-                        testDataFitRules=np.multiply(testDataFitRules,
-                            (self.X_train[:,p]>tempRule[k,p,1]))
-                
-                # print(testDataFitRules)
-                if sum(testDataFitRules)!=0:
-                    tempY=np.multiply (testDataFitRules , (i==self.Y_train))                        
-                    ruleTrainReliability[k]=sum(tempY)/sum(testDataFitRules)
-                    ruleTrainSize[k]=sum(testDataFitRules)
-                    # print(sum(tempY)/sum(testDataFitRules))
-                    
-                self.ruleTrainReliability[dicIndex]=ruleTrainReliability
-                self.ruleTrainSize[dicIndex]=ruleTrainSize      
-                
-        # Here we have computed the size of the rules and the reliability of 
-        # them the next step is to further select them
-        
-        self.selectedRule={}
-        for i in range(self.classNum):
-            dicIndex=str(i)
-            
-            tempRule=self.collectedRule[dicIndex]
-               
-            ruleTrainReliability=self.ruleTrainReliability[dicIndex]  
-            ruleTrainSize=self.ruleTrainSize[dicIndex]
-            
-            checkVec1=(ruleTrainSize>=thresholdDataNum)
-            checkVec2=(ruleTrainReliability>=thresholdReliability)
-            
-            checkVec=checkVec1*checkVec2
-            
-            deleteIndex=[]
-            for q in range(len(checkVec)):
-                if checkVec[q]==0:
-                    deleteIndex.append(q)
-                    
-            tempRule=np.delete(tempRule, deleteIndex, axis=0)
-            self.selectedRule[dicIndex]=tempRule
-            
-        # The next step is to find the unique sparsity patterns and find out 
-        # the most common sparsity patterns. After selecting the most common 
-        # patterns we can compute the mean and finally select the rules
-        self.uniqueSparsePattern={}
-        self.uniqueSparsePatternCount={}
-        
-        self.finalRule={}
-        for i in range(self.classNum):
-            
-            dicIndex=str(i)
-            tempRule=self.selectedRule[dicIndex]
-            
-            sparsePattern=np.sign(tempRule)
-            sizeMat=np.shape(sparsePattern)
-            
-            if sizeMat[0]!=0:
-            
-                sparsePattern=np.reshape(sparsePattern, (sizeMat[0],sizeMat[1]*2))   
-              
-                # use the unique function to find the unique sparse pattern
-                uniqueSparsePattern,patternCount=np.unique(sparsePattern,return_counts=True,axis=0)
-                
-                self.uniqueSparsePattern[dicIndex]=uniqueSparsePattern
-                self.uniqueSparsePatternCount[dicIndex]=patternCount
-                
-                sequenceCount=np.argsort(-patternCount)         
-                
-                
-                finalRule=np.zeros((ruleNumber,sizeMat[1],2))
-                for j in range(ruleNumber):
-                    
-                    for p in range(sizeMat[0]):
-                        if (sparsePattern[p,:] == uniqueSparsePattern[sequenceCount[j],:]).all():
-                            
-                            finalRule[j,:,:]+=tempRule[p,:,:]
-                            
-                    finalRule[j,:,:]=finalRule[j,:,:]/patternCount[sequenceCount[j]]
-                    
-                self.finalRule[dicIndex]=finalRule   
-                
-            else:
-                print('Cannot find available rules. Please relax cretarion.')
-                    
     
     ###########################################################################
-    # The following method will use the detailBackTrack() to collect rules for
-    # all classes. In the learnedRule array, those zero arrays will be rmoved
+    # The following method will use the unfoldTrees() to collect rules for
+    # selected classes. Those zero arrays will be rmoved
     ###########################################################################
    
-    def collectRule(self):
-        # this command will compute the generated rules
-        collectedAllRule={}
-        for i in range(self.classNum):
-            dicIndex=str(i)
-            collectedAllRule[dicIndex]=self.detailBackTrack(i)       
-        # The above code only collect all the rules that are generated
-        # the next step is to select the better rule based on the reliability 
-        # of each rule 
-        
+    def collectRule(self,selectedClass=1):
+           
         # In the following code we generate a more structured rule data
+        # by removing those arrays that are fully zeros
+        tempRule=self.unfoldTrees(selectedClass)    
         self.collectedRule={}
-        for i in range(self.classNum):
-            dicIndex=str(i)
-            tempRule=collectedAllRule[dicIndex] 
-            ruleShape=np.shape(tempRule)
-            tempRule=np.reshape(tempRule, (ruleShape[0]*ruleShape[1], self.featureNum ,2 ))
-            
-            checkNull=np.reshape(tempRule, (ruleShape[0]*ruleShape[1], self.featureNum*2 ))
-            checkNull=np.sum(checkNull**2,axis=1)
-            checkNull=np.sign(checkNull)
-            
-            deleteIndex=[]
-            for q in range(len(checkNull)):
-                if checkNull[q]==0:
-                    deleteIndex.append(q)
-            tempRule=np.delete(tempRule, deleteIndex, axis=0)
-            
-            self.collectedRule[dicIndex]=tempRule
+        ruleShape=np.shape(tempRule)
+        tempRule=np.reshape(tempRule, (ruleShape[0]*ruleShape[1], self.featureNum ,2 ))
+        
+        checkNull=np.reshape(tempRule, (ruleShape[0]*ruleShape[1], self.featureNum*2 ))
+        checkNull=np.sum(checkNull**2,axis=1)
+        checkNull=np.sign(checkNull)
+        
+        deleteIndex=[]
+        for q in range(len(checkNull)):
+            if checkNull[q]==0:
+                deleteIndex.append(q)
+        tempRule=np.delete(tempRule, deleteIndex, axis=0)
+        
+        self.collectedRule=tempRule
             
             
     
     ###########################################################################
-    # The following set of codes will track all the rules learned from training
-    # the decision tree method for a single class
-    ###########################################################################
+    # The following set of codes will unfold trees for selected class
+    ###########################################################################   
     
-    def detailBackTrack(self,selectedClass):
-        # we will back track the design rules for class with no inegration
+    def unfoldTrees(self,selectedClass):
+        # This code unfold the decision trees for a selected calss
                
         self.max_leafNum=0
         for k in range(self.num_tree):
@@ -417,29 +427,5 @@ class TreeMethod():
                                     tempRule[featureSelected,leftOrRight]=threshold
                             tempIndex=parentNode 
                             
-                            collectedRule[k,i,:,:]=tempRule
-                    
-                    ##########################################################
-                    # One can activate the following code to check the process 
-                    # of collecting all the rules
-                    ##########################################################
-                    
-                    # tempString = 'The rule is:\n'      
-                    
-                    # for j in range(self.featureNum):
-                        
-                    #     if tempRule[j,0]!=0:
-                    #         tempString+='feature '
-                    #         tempString+= str(j)
-                    #         tempString+='<'
-                    #         tempString+=str(tempRule[j,0])
-                    #         tempString+='\n'
-                    #     if tempRule[j,1]!=0:
-                    #         tempString+='feature '
-                    #         tempString+= str(j)
-                    #         tempString+='>'
-                    #         tempString+=str(tempRule[j,1])
-                    #         tempString+='\n' 
-                    # print(tempString)
-                    
+                            collectedRule[k,i,:,:]=tempRule                    
         return collectedRule
