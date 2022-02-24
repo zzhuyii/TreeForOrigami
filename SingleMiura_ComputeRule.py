@@ -9,70 +9,22 @@ from DecisionTree import TreeMethod
 
 
 # load the gripper performance data set
-data1 = np.loadtxt('data1_MiuraSheet.txt',delimiter=',')
-data2 = np.loadtxt('data1_TMPSheet.txt',delimiter=',')
+data1 = np.loadtxt('data0_SingleMiura.txt',delimiter=',')
 
-fileTemp= open("data1_FeatureName.txt", "r")
+fileTemp= open("data0_FeatureName.txt", "r")
 tempfeatureName=fileTemp.readline()
 tempfeatureName=tempfeatureName.split()
-tempfeatureName=tempfeatureName[1:6]
+featureName=tempfeatureName[0:4]
 
 # Separate the data and the label
-dataFeature1 = (data1[:2000,1:6])
-dataPerformance1 = (data1[:2000,6:12])
-dataFeature2 = (data2[:2000,1:6])
-dataPerformance2 = (data2[:2000,6:12])
-dataFeature = np.concatenate((dataFeature1, dataFeature2), axis=0)
-dataPerformance = np.concatenate((dataPerformance1, dataPerformance2), axis=0)
+dataFeature = (data1[:1000,0:4])
+dataPerformance = (data1[:1000,4:7])
 
 # Set up the feature database
-# First we create the data matrix before using the OneHotEncoder
-tempX = dataFeature
-tempX[:,2]=tempX[:,2]*1000
-tempX[:,3]=tempX[:,3]*1000
-tempX[:,4]=tempX[:,4]*1000
-
-categoryX=tempX[:,:2]
-otherX=tempX[:,2:5]
-categoryFeatureName=tempfeatureName[:2]
-otherFeatureName=tempfeatureName[2:5]
-
-# use the OneHotEncoder to transform the system
-encoder = OneHotEncoder(sparse=False)
-encodeX = encoder.fit_transform(categoryX)
-encodeFeatureName=encoder.get_feature_names()
-
-# Reconstruct the feature database
-totalX=np.concatenate((encodeX,otherX),axis=1)
-featureName=np.concatenate((encodeFeatureName,otherFeatureName),axis=0)
-
-# we need another feature to determine the type of pattern
-patternType=np.concatenate((np.zeros((2000,1)),np.ones((2000,1))),axis=0)
-totalX=np.concatenate((patternType,totalX),axis=1)
-featureName=np.concatenate((['pattern'],featureName),axis=0)
+totalX=dataFeature
 
 # Set up the label for the data base
-# totalY_target1=dataPerformance[:,1]<15000
-# totalY_target2=dataPerformance[:,5]<150000
-# 90% bending stiffness as shifting target
-# # totalY_target_shift=(dataPerformance[:,2]>0) # deactivated
-# # totalY_target_shift=(dataPerformance[:,2]>100)*(dataPerformance[:,2]<200)
-# # totalY_target_shift=(dataPerformance[:,2]>200)*(dataPerformance[:,2]<400)
-# # totalY_target_shift=(dataPerformance[:,2]>400)*(dataPerformance[:,2]<700)
-# totalY_target_shift=(dataPerformance[:,2]>700)*(dataPerformance[:,2]<1600)
-# totalY=totalY_target1*totalY_target2*totalY_target_shift
-
-
-# totalY=(dataPerformance[:,2]<100)
-# totalY=(dataPerformance[:,2]>100)*(dataPerformance[:,2]<160)
-# totalY=(dataPerformance[:,2]>160)*(dataPerformance[:,2]<220)
-# totalY=(dataPerformance[:,2]>220)*(dataPerformance[:,2]<320)
-
-totalY=(dataPerformance[:,4]>15000)*(dataPerformance[:,4]<30000)
-totalY=(dataPerformance[:,4]>30000)*(dataPerformance[:,4]<50000)
-totalY=(dataPerformance[:,4]>50000)*(dataPerformance[:,4]<80000)
-totalY=(dataPerformance[:,4]>80000)
-
+totalY=(dataPerformance[:,1]<6000)
 print('data number that meets target', sum(totalY))
 
 # Randomly split the data into testing and training sets
