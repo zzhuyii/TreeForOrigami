@@ -5,4 +5,4 @@ This repo is associated with the following reference:
 
 ## Reference
 
-Yi Zhu and Evgueni T. Filipov, 2022, Harnessing interpretable machine learning for origami feature design and pattern selection, (submitted) 
+Yi Zhu and Evgueni T. Filipov, 2022, Harnessing interpretable machine learning for origami feature design and pattern selection, (submitted) (https://arxiv.org/abs/2204.07235)
