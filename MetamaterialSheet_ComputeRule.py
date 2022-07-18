@@ -42,6 +42,11 @@ encoder = OneHotEncoder(sparse=False)
 encodeX = encoder.fit_transform(categoryX)
 encodeFeatureName=encoder.get_feature_names()
 
+# Convert the names back to the normal names
+for i in range(6):
+    encodeFeatureName[i]=encodeFeatureName[i].replace('x0_','m=')
+    encodeFeatureName[i]=encodeFeatureName[i].replace('x1_','n=')
+
 # Reconstruct the feature database
 totalX=np.concatenate((encodeX,otherX),axis=1)
 featureName=np.concatenate((encodeFeatureName,otherFeatureName),axis=0)
@@ -86,6 +91,12 @@ tree.train(X_train, Y_train, featureName)
 tree.computeRule(X_train, Y_train, ruleNumber=1)
 tree.testRule(X_test,Y_test)
 tree.printRule()
+
+# Plot the rules for easy interpretation
+featureMin=[0,0,0,0,0,0,0,0.5,1.0,1.0] # minimum value for feature
+featureMax=[1,1,1,1,1,1,1,1.0,6.0,4.0] # maximum value for feature
+tree.plotRule(featureMin,featureMax)
+
 
 # Predict the results of the testing set using the embeded Random Forest in
 # the proposed method

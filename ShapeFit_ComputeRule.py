@@ -37,6 +37,11 @@ encoder = OneHotEncoder(sparse=False)
 encodeX = encoder.fit_transform(categoryX)
 encodeFeatureName=encoder.get_feature_names()
 
+# Convert the names back to the normal names
+for i in range(4):
+    encodeFeatureName[i]=encodeFeatureName[i].replace('x0_','m=')
+
+
 # Reconstruct the feature database
 totalX=np.concatenate((encodeX,otherX),axis=1)
 featureName=np.concatenate((encodeFeatureName,otherFeatureName),axis=0)
@@ -56,18 +61,18 @@ totalX[:,9]=totalX[:,9]*1000 # to mm
 # print('data number that meets target', sum(totalY))
 
 # Target 2
-# totalY_target1=(dataPerformance[:,0]>800) # Stiffness in Z (N/3m)
-# totalY_target2=dataPerformance[:,2]>600 # Stiffness in X (N/m)
-# totalY_target3=dataPerformance[:,3]<0.1 # error 
-# totalY=totalY_target1*totalY_target2*totalY_target3
-# print('data number that meets target', sum(totalY))
-
-# Target 3
-totalY_target1=(dataPerformance[:,0]>300) # Stiffness in Z (N/m)
-totalY_target2=dataPerformance[:,2]>150 # Stiffness in X (N/m)
-totalY_target3=dataPerformance[:,3]<0.06 # error 
+totalY_target1=(dataPerformance[:,0]>800) # Stiffness in Z (N/3m)
+totalY_target2=dataPerformance[:,2]>600 # Stiffness in X (N/m)
+totalY_target3=dataPerformance[:,3]<0.1 # error 
 totalY=totalY_target1*totalY_target2*totalY_target3
 print('data number that meets target', sum(totalY))
+
+# Target 3
+# totalY_target1=(dataPerformance[:,0]>300) # Stiffness in Z (N/m)
+# totalY_target2=dataPerformance[:,2]>150 # Stiffness in X (N/m)
+# totalY_target3=dataPerformance[:,3]<0.06 # error 
+# totalY=totalY_target1*totalY_target2*totalY_target3
+# print('data number that meets target', sum(totalY))
 
 
 # Randomly split the data into testing and training sets
@@ -82,6 +87,11 @@ tree.train(X_train, Y_train, featureName)
 tree.computeRule(X_train, Y_train, ruleNumber=1)
 tree.testRule(X_test,Y_test)
 tree.printRule()
+
+# Plot the rules for easy interpretation
+featureMin=[0,0,0,0,0.5,1.0,1.0,100.0,10.0,50.0] # minimum value for feature
+featureMax=[1,1,1,1,1.0,6.0,4.0,300.0,40.0,250.0] # maximum value for feature
+tree.plotRule(featureMin,featureMax)
 
 # Predict the results of the testing set using the embeded Random Forest in
 # the proposed method

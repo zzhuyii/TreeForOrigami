@@ -6,6 +6,7 @@
 from sklearn import model_selection
 from sklearn.tree import DecisionTreeClassifier
 from scipy import stats
+import matplotlib.pyplot as plt
 import numpy as np
 
 # The class is called TreeMethod
@@ -78,11 +79,11 @@ class TreeMethod():
             # In real practice the random state need not be fixed.            
             
     ###########################################################################
-    # The following method train the individual decision trees
+    # The following method train the decision trees
     ########################################################################### 
         
-    def train(self,X_train,Y_train,featureName):
-        
+    def train(self,X_train,Y_train,featureName):        
+      
         self.featureNum=len(X_train[0,:])
         self.featureName=featureName
         
@@ -217,9 +218,7 @@ class TreeMethod():
     
     
     ###########################################################################
-    # The following method will select rules. The rules selected should be 
-    # statistically significant meaning that the branch should contain more 
-    # data points than the specified threshold.
+    # The following method will print the rules ((in text)
     ###########################################################################                
     
     def printRule(self):  
@@ -253,7 +252,46 @@ class TreeMethod():
             
             
     ###########################################################################
-    # The following method willfind the list of data that fit rules
+    # The following set of codes will plot the rules using figures
+    ###########################################################################  
+         
+    def plotRule(self,featureMin,featureMax):  
+                      
+        
+        for i in range(self.ruleNumber):
+            
+            fig, ax=plt.subplots(self.featureNum,1,figsize=[5,8])   
+            fig.dpi=300
+                    
+            for j in range(self.featureNum):
+                
+                selectLowThreshold=featureMin[j]
+                if self.finalRule[i,j,1]!=0:
+                    selectLowThreshold=self.finalRule[i,j,1]
+                
+                selectHighThreshold=featureMax[j]
+                if self.finalRule[i,j,0]!=0:
+                    selectHighThreshold=self.finalRule[i,j,0]
+                
+                stats=[{'med': None, 
+                        'q1': selectLowThreshold, 
+                        'q3': selectHighThreshold, 
+                        'whislo': featureMin[j],
+                        'whishi': featureMax[j], 
+                        'label': str(self.featureName[j]) }]
+            
+                ax[j].bxp(stats,showfliers=False,
+                       showmeans=False,
+                       vert=False,
+                       widths=0.6)  
+                
+            fig.tight_layout()
+            fig.show()
+            
+
+            
+    ###########################################################################
+    # The following method will find the list of data that fit rules
     ###########################################################################      
             
     def findDataFitFinalRule(self,X_train,Y_train,X_test,Y_test):
@@ -429,3 +467,5 @@ class TreeMethod():
                             
                             collectedRule[k,i,:,:]=tempRule                    
         return collectedRule
+    
+    
