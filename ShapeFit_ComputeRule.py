@@ -80,6 +80,10 @@ print('data number that meets target', sum(totalY))
 X_train, X_test, Y_train, Y_test = model_selection.train_test_split(
     totalX,totalY, test_size = 0.4, random_state= 10)
 
+#
+X_train, X_test, Y_train, Y_test = model_selection.train_test_split(
+    totalX,totalY, test_size = 0.4, random_state= np.random)
+
 # Apply the proposed method for computing the design rules
 tree=TreeMethod()
 tree.setParameter(alpha=0.0001, depth=20, num_tree=100)

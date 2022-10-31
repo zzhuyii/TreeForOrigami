@@ -8,20 +8,21 @@ from sklearn.preprocessing import OneHotEncoder
 from DecisionTree import TreeMethod
 
 
-# load the gripper performance data set
-data1 = np.loadtxt('data1_MiuraSheet.txt',delimiter=',')
-data2 = np.loadtxt('data1_TMPSheet.txt',delimiter=',')
 
-fileTemp= open("data1_FeatureName.txt", "r")
+# load the gripper performance data set
+data1 = np.loadtxt('data4_MiuraSheetMat.txt',delimiter=',')
+data2 = np.loadtxt('data4_TMPSheetMat.txt',delimiter=',')
+
+fileTemp= open("data4_FeatureName.txt", "r")
 tempfeatureName=fileTemp.readline()
 tempfeatureName=tempfeatureName.split()
-tempfeatureName=tempfeatureName[1:6]
+tempfeatureName=tempfeatureName[1:8]
 
 # Separate the data and the label
-dataFeature1 = (data1[:2000,1:6])
-dataPerformance1 = (data1[:2000,6:12])
-dataFeature2 = (data2[:2000,1:6])
-dataPerformance2 = (data2[:2000,6:12])
+dataFeature1 = (data1[:2000,1:8])
+dataPerformance1 = (data1[:2000,8:14])
+dataFeature2 = (data2[:2000,1:8])
+dataPerformance2 = (data2[:2000,8:14])
 dataFeature = np.concatenate((dataFeature1, dataFeature2), axis=0)
 dataPerformance = np.concatenate((dataPerformance1, dataPerformance2), axis=0)
 
@@ -31,11 +32,13 @@ tempX = dataFeature
 tempX[:,2]=tempX[:,2]*1000
 tempX[:,3]=tempX[:,3]*1000
 tempX[:,4]=tempX[:,4]*1000
+tempX[:,5]=tempX[:,5]/1000000000
+tempX[:,6]=tempX[:,6]/1000000000
 
 categoryX=tempX[:,:2]
-otherX=tempX[:,2:5]
+otherX=tempX[:,2:7]
 categoryFeatureName=tempfeatureName[:2]
-otherFeatureName=tempfeatureName[2:5]
+otherFeatureName=tempfeatureName[2:7]
 
 # use the OneHotEncoder to transform the system
 encoder = OneHotEncoder(sparse=False)
@@ -56,27 +59,11 @@ patternType=np.concatenate((np.zeros((2000,1)),np.ones((2000,1))),axis=0)
 totalX=np.concatenate((patternType,totalX),axis=1)
 featureName=np.concatenate((['pattern'],featureName),axis=0)
 
-# Set up the label for the data base
-# totalY_target1=dataPerformance[:,1]<15000
-# totalY_target2=dataPerformance[:,5]<150000
-# 90% bending stiffness as shifting target
-# # totalY_target_shift=(dataPerformance[:,2]>0) # deactivated
-# # totalY_target_shift=(dataPerformance[:,2]>100)*(dataPerformance[:,2]<200)
-# # totalY_target_shift=(dataPerformance[:,2]>200)*(dataPerformance[:,2]<400)
-# # totalY_target_shift=(dataPerformance[:,2]>400)*(dataPerformance[:,2]<700)
-# totalY_target_shift=(dataPerformance[:,2]>700)*(dataPerformance[:,2]<1600)
-# totalY=totalY_target1*totalY_target2*totalY_target_shift
 
-
-totalY=(dataPerformance[:,2]<100)
-# totalY=(dataPerformance[:,2]>100)*(dataPerformance[:,2]<160)
-# totalY=(dataPerformance[:,2]>160)*(dataPerformance[:,2]<220)
-# totalY=(dataPerformance[:,2]>220)*(dataPerformance[:,2]<320)
-
-# totalY=(dataPerformance[:,4]>15000)*(dataPerformance[:,4]<30000)
-# totalY=(dataPerformance[:,4]>30000)*(dataPerformance[:,4]<50000)
-# totalY=(dataPerformance[:,4]>50000)*(dataPerformance[:,4]<80000)
-# totalY=(dataPerformance[:,4]>80000)
+totalY=(dataPerformance[:,2]<200)
+# totalY=(dataPerformance[:,2]>200)*(dataPerformance[:,2]<400)
+# totalY=(dataPerformance[:,2]>400)*(dataPerformance[:,2]<800)
+# totalY=(dataPerformance[:,2]>800)*(dataPerformance[:,2]<1600)
 
 print('data number that meets target', sum(totalY))
 
@@ -88,13 +75,13 @@ X_train, X_test, Y_train, Y_test = model_selection.train_test_split(
 tree=TreeMethod()
 tree.setParameter(alpha=0.0001, depth=20, num_tree=100)
 tree.train(X_train, Y_train, featureName)
-tree.computeRule(X_train, Y_train, ruleNumber=1)
+tree.computeRule(X_train, Y_train, ruleNumber=1, minData=15)
 tree.testRule(X_test,Y_test)
 tree.printRule()
 
 # Plot the rules for easy interpretation
-featureMin=[0,0,0,0,0,0,0,0.5,1.0,1.0] # minimum value for feature
-featureMax=[1,1,1,1,1,1,1,1.0,6.0,4.0] # maximum value for feature
+featureMin=[0,0,0,0,0,0,0,0.5,1.0,1.0,1.0,1.0] # minimum value for feature
+featureMax=[1,1,1,1,1,1,1,1.0,6.0,4.0,5.0,5.0] # maximum value for feature
 tree.plotRule(featureMin,featureMax)
 
 
@@ -186,3 +173,4 @@ accurateClass1 = sum((skKNN_Y_pred==Y_test) * (skKNN_Y_pred==1))
 Precision = accurateClass1 / sum(skKNN_Y_pred==1)
 Recall = accurateClass1 / sum(Y_test==1)
 print('precision is: ',Precision, '\n')
+
