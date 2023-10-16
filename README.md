@@ -1,6 +1,6 @@
 # Compute origami design rules using decision tree and random forest
 
-This repo shows the code for computing the origami design rules using a decision tree and random forest. The following two figures explais how the method work. Basically, we turn the inverse design of origami into a binary classification problem and trian a random forest to classify the data that meet the performance target from those that do not. After training the random forest, we pick the most representative tree branches from the enitre random forest for inverse design using the F-score.  
+This repo shows the code for computing the origami design rules using a decision tree and random forest. The following two figures explais how the method work. We first turn the inverse design of origami into a binary classification problem. Then we trian a random forest to classify the data that meet the performance target from those that do not. After training the random forest, we pick the most representative tree branches from the enitre random forest for inverse design using the F-score.  
 
 ![alt text](https://github.com/zzhuyii/TreeForOrigami/blob/main/Methodology.png)
 
