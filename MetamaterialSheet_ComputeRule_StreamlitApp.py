@@ -51,7 +51,7 @@ def RunTreeDesign(BS30LB,BS30UB,BS60LB,BS60UB,BS90LB,BS90UB):
         #encodeFeatureName[i]=encodeFeatureName[i].replace('x1_','n=')
     
     # Reconstruct the feature database
-    totalX=np.concatenate((encodeX,otherX),axis=1)
+    totalX=np.concatenate([encodeX,otherX],axis=1)
     
     #featureName=np.concatenate((encodeFeatureName,otherFeatureName),axis=0)
     
