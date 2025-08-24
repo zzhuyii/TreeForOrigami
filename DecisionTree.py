@@ -208,9 +208,8 @@ class TreeMethod():
         self.finalRuleTrainRecall=np.zeros(ruleNumber)
         self.finalRuleScore=np.zeros(ruleNumber)
         
-        maxScore=max(self.ruleScore)
-        
-        if maxScore>0:          
+               
+        if len(self.ruleScore) > 0:          
         
             for j in range(ruleNumber):
                 self.finalRule[j,:,:]=tempRule[sequenceCount[j],:,:]
