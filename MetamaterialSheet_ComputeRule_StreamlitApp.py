@@ -3,6 +3,7 @@ import streamlit as st
 
 from sklearn import model_selection
 from sklearn.preprocessing import OneHotEncoder
+
 from DecisionTree import TreeMethod
 
 def RunTreeDesign(BS30LB,BS30UB,BS60LB,BS60UB,BS90LB,BS90UB):    
@@ -120,19 +121,19 @@ BS30UB = st.selectbox(
      [2,4,6,8,10,12])
 
 BS60LB = st.selectbox(
-     "Select lower bond of stiffness at 30% extension (N/m):",
+     "Select lower bond of stiffness at 60% extension (N/m):",
      [2,4,6,8,10,12])
 
 BS60UB = st.selectbox(
-     "Select lower bond of stiffness at 30% extension (N/m):",
+     "Select lower bond of stiffness at 60% extension (N/m):",
      [2,4,6,8,10,12])
 
 BS90LB = st.selectbox(
-     "Select lower bond of stiffness at 30% extension (N/m):",
+     "Select lower bond of stiffness at 90% extension (N/m):",
      [2,4,6,8,10,12])
 
 BS90UB = st.selectbox(
-     "Select lower bond of stiffness at 30% extension (N/m):",
+     "Select lower bond of stiffness at 90% extension (N/m):",
      [2,4,6,8,10,12])
 
 
