@@ -42,6 +42,7 @@ def RunTreeDesign(BS30LB,BS30UB,BS60LB,BS60UB,BS90LB,BS90UB):
     
     print(np.shape(encodeX))
     st.text(np.shape(encodeX))
+    st.text(np.shape(otherX))
     #encodeFeatureName=encoder.get_feature_names()
     
     # Convert the names back to the normal names
