@@ -287,6 +287,7 @@ class TreeMethod():
                 
             fig.tight_layout()
             fig.show()
+            return fig
             
 
             
