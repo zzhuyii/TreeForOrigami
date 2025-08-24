@@ -88,27 +88,28 @@ def RunTreeDesign(BS30LB,BS30UB,BS60LB,BS60UB,BS90LB,BS90UB):
     featureMax=[1,1,1,1,1,1,1,1.0,6.0,4.0] # maximum value for feature
     fig=tree.plotRule(featureMin,featureMax)
     
+    return success,fig
     
-    # Predict the results of the testing set using the embeded Random Forest in
-    # the proposed method
-    Y_pred=tree.predict(X_test)
+    # # Predict the results of the testing set using the embeded Random Forest in
+    # # the proposed method
+    # Y_pred=tree.predict(X_test)
     
-    # calculate the accruacy of the prediction
-    accuratePredict = sum(Y_pred==Y_test)
-    accurateRateRF = accuratePredict / len(Y_pred)
+    # # calculate the accruacy of the prediction
+    # accuratePredict = sum(Y_pred==Y_test)
+    # accurateRateRF = accuratePredict / len(Y_pred)
     
-    # Precision of the prediction
-    accurateClass1 = sum((Y_pred==Y_test) * (Y_pred==1))
-    Precision = accurateClass1 / sum(Y_pred==1)
+    # # Precision of the prediction
+    # accurateClass1 = sum((Y_pred==Y_test) * (Y_pred==1))
+    # Precision = accurateClass1 / sum(Y_pred==1)
     
-    print('testing data Num for two classes: ')
-    print(sum(Y_pred==0), sum(Y_pred==1), '\n')
+    # print('testing data Num for two classes: ')
+    # print(sum(Y_pred==0), sum(Y_pred==1), '\n')
     
-    print('Embeded Random Forest')
-    print('accuracy is: ', accurateRateRF)
-    print('precision is: ', Precision, '\n') 
+    # print('Embeded Random Forest')
+    # print('accuracy is: ', accurateRateRF)
+    # print('precision is: ', Precision, '\n') 
     
-    return fig
+    
 
 
 st.subheader("Inverse Design of Origami Metamaterial Sheet")
@@ -147,6 +148,11 @@ BS90UB = st.selectbox(
      [2,4,6,8,10,12])
 
 
-fig=RunTreeDesign(BS30LB,BS30UB,BS60LB,BS60UB,BS90LB,BS90UB)
+success,fig=RunTreeDesign(BS30LB,BS30UB,BS60LB,BS60UB,BS90LB,BS90UB)
 
-st.pyplot(fig)
+if success==True:
+    st.pyplot(fig)
+else:
+    st.text('Seems that we cannot find a feasible solution. ' + 
+        'Please consider use a less strick search target, or ' +
+        'add additional data to the data set.' )    
