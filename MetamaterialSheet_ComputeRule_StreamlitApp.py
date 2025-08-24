@@ -32,27 +32,31 @@ def RunTreeDesign(BS30LB,BS30UB,BS60LB,BS60UB,BS90LB,BS90UB):
     
     categoryX=tempX[:,:2]
     otherX=tempX[:,2:5]
-    categoryFeatureName=tempfeatureName[:2]
-    otherFeatureName=tempfeatureName[2:5]
+    
+    #categoryFeatureName=tempfeatureName[:2]
+    #otherFeatureName=tempfeatureName[2:5]
     
     # use the OneHotEncoder to transform the system
     encoder = OneHotEncoder()
     encodeX = encoder.fit_transform(categoryX)
-    encodeFeatureName=encoder.get_feature_names()
+    #encodeFeatureName=encoder.get_feature_names()
     
     # Convert the names back to the normal names
-    for i in range(6):
-        encodeFeatureName[i]=encodeFeatureName[i].replace('x0_','m=')
-        encodeFeatureName[i]=encodeFeatureName[i].replace('x1_','n=')
+    #for i in range(6):
+        #encodeFeatureName[i]=encodeFeatureName[i].replace('x0_','m=')
+        #encodeFeatureName[i]=encodeFeatureName[i].replace('x1_','n=')
     
     # Reconstruct the feature database
     totalX=np.concatenate((encodeX,otherX),axis=1)
-    featureName=np.concatenate((encodeFeatureName,otherFeatureName),axis=0)
+    
+    #featureName=np.concatenate((encodeFeatureName,otherFeatureName),axis=0)
     
     # we need another feature to determine the type of pattern
     patternType=np.concatenate((np.zeros((2000,1)),np.ones((2000,1))),axis=0)
     totalX=np.concatenate((patternType,totalX),axis=1)
-    featureName=np.concatenate((['pattern'],featureName),axis=0)
+    
+    
+    featureName=['pattern','m=24','m=30','m=36','n=6','n=9','n=12','tc','tp','W']
 
     
     totalY=(dataPerformance[:,0]>BS30LB)*(dataPerformance[:,0]<BS30UB)*(dataPerformance[:,1]>BS60LB)*(dataPerformance[:,1]<BS60LB)*(dataPerformance[:,2]>BS90LB)*(dataPerformance[:,2]<BS90UB)
