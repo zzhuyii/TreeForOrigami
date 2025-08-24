@@ -3,4 +3,4 @@ imageio
 imageio-ffmpeg
 matplotlib
 numpy
-scikit-learn
+scikit-learn>=1.3.2
