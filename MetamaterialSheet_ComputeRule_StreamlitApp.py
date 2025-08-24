@@ -117,7 +117,7 @@ BS30LB = st.selectbox(
      [2,4,6,8,10,12])
 
 BS30UB = st.selectbox(
-     "Select lower bond of stiffness at 30% extension (N/m):",
+     "Select upper bond of stiffness at 30% extension (N/m):",
      [2,4,6,8,10,12])
 
 BS60LB = st.selectbox(
@@ -125,7 +125,7 @@ BS60LB = st.selectbox(
      [2,4,6,8,10,12])
 
 BS60UB = st.selectbox(
-     "Select lower bond of stiffness at 60% extension (N/m):",
+     "Select upper bond of stiffness at 60% extension (N/m):",
      [2,4,6,8,10,12])
 
 BS90LB = st.selectbox(
@@ -133,7 +133,7 @@ BS90LB = st.selectbox(
      [2,4,6,8,10,12])
 
 BS90UB = st.selectbox(
-     "Select lower bond of stiffness at 90% extension (N/m):",
+     "Select upper bond of stiffness at 90% extension (N/m):",
      [2,4,6,8,10,12])
 
 
