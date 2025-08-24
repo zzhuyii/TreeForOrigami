@@ -296,6 +296,45 @@ class TreeMethod():
             fig.show()
             return fig
             
+        
+    ###########################################################################
+    # The following set of codes will plot the rules using figures
+    ###########################################################################  
+         
+    def plotRuleStream(self,featureMin,featureMax):  
+                      
+        
+        for i in range(self.ruleNumber):
+            
+            fig, ax=plt.subplots(self.featureNum,1,figsize=[5,8])   
+            fig.dpi=300
+                    
+            for j in range(self.featureNum):
+                
+                selectLowThreshold=featureMin[j]
+                if self.finalRule[i,j,1]!=0:
+                    selectLowThreshold=self.finalRule[i,j,1]
+                
+                selectHighThreshold=featureMax[j]
+                if self.finalRule[i,j,0]!=0:
+                    selectHighThreshold=self.finalRule[i,j,0]
+                
+                stats=[{'med': None, 
+                        'q1': selectLowThreshold, 
+                        'q3': selectHighThreshold, 
+                        'whislo': featureMin[j],
+                        'whishi': featureMax[j], 
+                        'label': str(self.featureName[j]) }]
+            
+                ax[j].bxp(stats,showfliers=False,
+                       showmeans=False,
+                       vert=False,
+                       widths=0.6)  
+                
+            fig.tight_layout()
+            fig.show()
+            return fig
+                
 
             
     ###########################################################################
