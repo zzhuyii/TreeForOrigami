@@ -40,6 +40,8 @@ def RunTreeDesign(BS30LB,BS30UB,BS60LB,BS60UB,BS90LB,BS90UB):
     encoder = OneHotEncoder()
     encodeX = encoder.fit_transform(categoryX)
     
+    encodeX=np.array(encodeX)
+    
     print(np.shape(encodeX))
     st.text(np.shape(encodeX))
     st.text(np.shape(otherX))
