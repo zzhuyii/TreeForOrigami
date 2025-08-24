@@ -39,6 +39,8 @@ def RunTreeDesign(BS30LB,BS30UB,BS60LB,BS60UB,BS90LB,BS90UB):
     # use the OneHotEncoder to transform the system
     encoder = OneHotEncoder()
     encodeX = encoder.fit_transform(categoryX)
+    
+    print(np.size(encodeX))
     #encodeFeatureName=encoder.get_feature_names()
     
     # Convert the names back to the normal names
