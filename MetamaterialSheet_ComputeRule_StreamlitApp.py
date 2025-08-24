@@ -77,7 +77,9 @@ def RunTreeDesign(BS30LB,BS30UB,BS60LB,BS60UB,BS90LB,BS90UB):
     tree=TreeMethod()
     tree.setParameter(alpha=0.0001, depth=20, num_tree=100)
     tree.train(X_train, Y_train, featureName)
-    tree.computeRule(X_train, Y_train, ruleNumber=1)
+    
+    success = tree.computeRule(X_train, Y_train, ruleNumber=1)
+    
     tree.testRule(X_test,Y_test)
     tree.printRule()
     

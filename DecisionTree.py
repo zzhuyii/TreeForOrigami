@@ -208,12 +208,20 @@ class TreeMethod():
         self.finalRuleTrainRecall=np.zeros(ruleNumber)
         self.finalRuleScore=np.zeros(ruleNumber)
         
-        for j in range(ruleNumber):
-            self.finalRule[j,:,:]=tempRule[sequenceCount[j],:,:]
-            self.finalRuleTrainSize[j]=self.ruleTrainSize[sequenceCount[j]]
-            self.finalRuleTrainPrecision[j]=self.ruleTrainPrecision[sequenceCount[j]]
-            self.finalRuleTrainRecall[j]=self.ruleTrainRecall[sequenceCount[j]]
-            self.finalRuleScore[j]=self.ruleScore[sequenceCount[j]]
+        maxScore=max(self.ruleScore)
+        
+        if maxScore>0:          
+        
+            for j in range(ruleNumber):
+                self.finalRule[j,:,:]=tempRule[sequenceCount[j],:,:]
+                self.finalRuleTrainSize[j]=self.ruleTrainSize[sequenceCount[j]]
+                self.finalRuleTrainPrecision[j]=self.ruleTrainPrecision[sequenceCount[j]]
+                self.finalRuleTrainRecall[j]=self.ruleTrainRecall[sequenceCount[j]]
+                self.finalRuleScore[j]=self.ruleScore[sequenceCount[j]]
+                
+            return True
+        else:
+            return False
         
     
     
