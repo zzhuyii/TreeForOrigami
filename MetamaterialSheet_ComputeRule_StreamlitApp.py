@@ -1,9 +1,7 @@
 import numpy as np
 import streamlit as st
-
 from sklearn import model_selection
 from sklearn.preprocessing import OneHotEncoder
-
 from DecisionTree import TreeMethod
 
 def RunTreeDesign(BS30LB,BS30UB,BS60LB,BS60UB,BS90LB,BS90UB):    
@@ -38,7 +36,7 @@ def RunTreeDesign(BS30LB,BS30UB,BS60LB,BS60UB,BS90LB,BS90UB):
     otherFeatureName=tempfeatureName[2:5]
     
     # use the OneHotEncoder to transform the system
-    encoder = OneHotEncoder(sparse=False)
+    encoder = OneHotEncoder()
     encodeX = encoder.fit_transform(categoryX)
     encodeFeatureName=encoder.get_feature_names()
     
@@ -135,7 +133,6 @@ BS90LB = st.selectbox(
 BS90UB = st.selectbox(
      "Select upper bond of stiffness at 90% extension (N/m):",
      [2,4,6,8,10,12])
-
 
 
 fig=RunTreeDesign(BS30LB,BS30UB,BS60LB,BS60UB,BS90LB,BS90UB)
