@@ -60,7 +60,7 @@ def RunTreeDesign(BS30LB,BS30UB,BS60LB,BS60UB,BS90LB,BS90UB):
     featureName=['pattern','m=24','m=30','m=36','n=6','n=9','n=12','tc','tp','W']
 
     
-    totalY=(dataPerformance[:,0]>BS30LB)*(dataPerformance[:,0]<BS30UB)*(dataPerformance[:,1]>BS60LB)*(dataPerformance[:,1]<BS60LB)*(dataPerformance[:,2]>BS90LB)*(dataPerformance[:,2]<BS90UB)
+    totalY=(dataPerformance[:,0]>BS30LB)*(dataPerformance[:,0]<BS30UB)*(dataPerformance[:,1]>BS60LB)*(dataPerformance[:,1]<BS60UB)*(dataPerformance[:,2]>BS90LB)*(dataPerformance[:,2]<BS90UB)
     
     st.text('data number that meets target')
     st.text(sum(totalY))
