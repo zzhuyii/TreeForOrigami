@@ -116,34 +116,38 @@ st.text('This is a demo for using the Sim-FAST package to simulate the deploymen
         'connections are rigid, all members share the same cross-section, and ' +
         'ignore buckling related failure mode when calculating the loading.')
 
-st.subheader("Setting up the deployable bridge")
+st.subheader("Inverse Design Target")
 
 BS30LB = st.selectbox(
      "Select lower bond of stiffness at 30% extension (N/m):",
-     [2,4,6,8,10,12])
+     [10,100,400])
 
 BS30UB = st.selectbox(
      "Select upper bond of stiffness at 30% extension (N/m):",
-     [2,4,6,8,10,12])
+     [400,800,1600,3200])
 
 BS60LB = st.selectbox(
      "Select lower bond of stiffness at 60% extension (N/m):",
-     [2,4,6,8,10,12])
+     [10,100,400])
 
 BS60UB = st.selectbox(
      "Select upper bond of stiffness at 60% extension (N/m):",
-     [2,4,6,8,10,12])
+     [400,800,1600,3200])
 
 BS90LB = st.selectbox(
      "Select lower bond of stiffness at 90% extension (N/m):",
-     [2,4,6,8,10,12])
+     [10,100,400])
 
 BS90UB = st.selectbox(
      "Select upper bond of stiffness at 90% extension (N/m):",
-     [2,4,6,8,10,12])
+     [400,800,1600,3200])
 
 
 success,fig=RunTreeDesign(BS30LB,BS30UB,BS60LB,BS60UB,BS90LB,BS90UB)
+
+
+st.subheader("Inverse Design Results")
+
 
 if success==True:
     st.pyplot(fig)
