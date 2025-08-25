@@ -62,7 +62,8 @@ def RunTreeDesign(BS30LB,BS30UB,BS60LB,BS60UB,BS90LB,BS90UB):
     
     totalY=(dataPerformance[:,0]>BS30LB)*(dataPerformance[:,0]<BS30UB)*(dataPerformance[:,1]>BS60LB)*(dataPerformance[:,1]<BS60LB)*(dataPerformance[:,2]>BS90LB)*(dataPerformance[:,2]<BS90UB)
     
-    st.text('data number that meets target', sum(totalY))
+    st.text('data number that meets target')
+    st.text(sum(totalY))
     
     # Randomly split the data into testing and training sets
     X_train, X_test, Y_train, Y_test = model_selection.train_test_split(
