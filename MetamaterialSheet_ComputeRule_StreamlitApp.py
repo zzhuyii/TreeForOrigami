@@ -116,15 +116,15 @@ st.text('This is a demo for using the Sim-FAST package to simulate the deploymen
         'connections are rigid, all members share the same cross-section, and ' +
         'ignore buckling related failure mode when calculating the loading.')
 
-st.subheader("Inverse Design Target")
+st.subheader("Inverse Design Targets")
 
 BS30LB = st.selectbox(
      "Select lower bond of stiffness at 30% extension (N/m):",
-     [1000,10000,40000])
+     [10000,100000,400000])
 
 BS30UB = st.selectbox(
      "Select upper bond of stiffness at 30% extension (N/m):",
-     [40000,80000,160000,320000])
+     [400000,800000,1600000,3200000])
 
 BS60LB = st.selectbox(
      "Select lower bond of stiffness at 60% extension (N/m):",
