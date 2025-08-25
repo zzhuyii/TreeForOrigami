@@ -112,16 +112,16 @@ st.subheader("Inverse Design of Origami Metamaterial Sheet")
 
 st.text('Developer: Dr. Yi Zhu')
 
-st.text('This is a demo for using the Sim-FAST package to simulate the deployment ' + 
-        'and load carrying capacity of kirigami truss bridges. We assume that ' +
-        'connections are rigid, all members share the same cross-section, and ' +
-        'ignore buckling related failure mode when calculating the loading.')
+st.text('This is a demo for using branches in a decision tree to inverse design ' + 
+        'origami metamaterial surface. Here, we had pre-generated a database ' +
+        'for an TMP origami pattern and a Miura origami pattern. Both pattern' +
+        'can be deployed to .')
 
 st.subheader("Inverse Design Targets")
 
 BS30LB = st.selectbox(
      "Select lower bond of stiffness at 30% extension (N/m):",
-     [5000,10000,100000,400000])
+     [1000,5000,10000,100000,400000])
 
 BS30UB = st.selectbox(
      "Select upper bond of stiffness at 30% extension (N/m):",
