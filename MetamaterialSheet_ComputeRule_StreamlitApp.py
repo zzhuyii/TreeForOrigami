@@ -125,7 +125,7 @@ BS30LB = st.selectbox(
 
 BS30UB = st.selectbox(
      "Select upper bond of stiffness at 30% extension (N/m):",
-     [400000,800000,1600000,3200000])
+     [3200000,1600000,800000,400000,100000])
 
 BS60LB = st.selectbox(
      "Select lower bond of stiffness at 60% extension (N/m):",
@@ -133,15 +133,15 @@ BS60LB = st.selectbox(
 
 BS60UB = st.selectbox(
      "Select upper bond of stiffness at 60% extension (N/m):",
-     [100000,500000,1000000])
+     [1000000,500000,100000,50000,10000])
 
 BS90LB = st.selectbox(
      "Select lower bond of stiffness at 90% extension (N/m):",
-     [5000,10000,40000])
+     [5000,10000,40000,80000])
 
 BS90UB = st.selectbox(
      "Select upper bond of stiffness at 90% extension (N/m):",
-     [40000,80000,160000,320000])
+     [320000,160000,80000,40000,10000])
 
 
 success,fig=RunTreeDesign(BS30LB,BS30UB,BS60LB,BS60UB,BS90LB,BS90UB)
