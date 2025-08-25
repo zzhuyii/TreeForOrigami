@@ -4,7 +4,7 @@ from sklearn import model_selection
 from sklearn.preprocessing import OneHotEncoder
 from DecisionTree import TreeMethod
 
-def RunTreeDesign(BS30LB,BS30UB,BS60LB,BS60UB,BS90LB,BS90UB):    
+def RunTreeDesign(BS30LB,BS30UB,BS60LB,BS60UB,BS90LB,BS90UB,randomSeed):    
 
     # load the gripper performance data set
     data1 = np.loadtxt('data1_MiuraSheet.txt',delimiter=',')
@@ -67,7 +67,7 @@ def RunTreeDesign(BS30LB,BS30UB,BS60LB,BS60UB,BS90LB,BS90UB):
     
     # Randomly split the data into testing and training sets
     X_train, X_test, Y_train, Y_test = model_selection.train_test_split(
-        totalX,totalY, test_size = 0.4, random_state=0)
+        totalX,totalY, test_size = 0.4, random_state=randomSeed)
     
     # Apply the proposed method for computing the design rules
     tree=TreeMethod()
@@ -114,10 +114,24 @@ st.text('Developer: Dr. Yi Zhu')
 
 st.text('This is a demo for using branches in a decision tree to inverse design ' + 
         'origami metamaterial surface. Here, we had pre-generated a database ' +
-        'for an TMP origami pattern and a Miura origami pattern. Both pattern' +
-        'can be deployed to .')
+        'for an TMP origami pattern and a Miura origami pattern. Both patterns ' +
+        'can be deployed from a compact state to a flat state. The target parameters ' + 
+        'we hope to study is the bending stiffness of surface when deployed into ' +
+        'different length (30% 60% and 90% extension). The design parameters include ' +
+        'the type of patterns, the number of sections, thickness of crease, ' + 
+        'width of creases, and thickness of facades. The tree method can produce ' +
+        'a target design that satisfy the target. By focusing on the tree branches, ' +
+        'our methods is actually stable!')
+
+st.image("CanopyDetails.png")
+
 
 st.subheader("Inverse Design Targets")
+
+randomSeed = st.selectbox(
+     "Select a random seed for training testing data separation:",
+     [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15])
+
 
 BS30LB = st.selectbox(
      "Select lower bond of stiffness at 30% extension (N/m):",
@@ -144,7 +158,7 @@ BS90UB = st.selectbox(
      [320000,160000,80000,40000,10000])
 
 
-success,fig=RunTreeDesign(BS30LB,BS30UB,BS60LB,BS60UB,BS90LB,BS90UB)
+success,fig=RunTreeDesign(BS30LB,BS30UB,BS60LB,BS60UB,BS90LB,BS90UB,randomSeed)
 
 
 st.subheader("Inverse Design Results")
