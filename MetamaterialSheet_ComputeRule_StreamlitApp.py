@@ -170,7 +170,7 @@ st.text('Here is the results for the inverse design. Please pay attention that '
 
 
 if success==True:
-    st.pyplot(fig,width=600)
+    st.pyplot(fig)
 else:
     st.text('Seems that we cannot find a feasible solution. ' + 
         'Please consider use a less strick search target, or ' +
