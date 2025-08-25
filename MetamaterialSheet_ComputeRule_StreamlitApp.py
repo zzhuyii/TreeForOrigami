@@ -163,9 +163,14 @@ success,fig=RunTreeDesign(BS30LB,BS30UB,BS60LB,BS60UB,BS90LB,BS90UB,randomSeed)
 
 st.subheader("Inverse Design Results")
 
+st.text('Here is the results for the inverse design. Please pay attention that ' + 
+        'the categorical data is represented using one-hot encoder. ' +
+        'When changing random seed for the testing training data separation, we ' +
+        'typically obtain similar results. ' )
+
 
 if success==True:
-    st.pyplot(fig)
+    st.pyplot(fig,width=600)
 else:
     st.text('Seems that we cannot find a feasible solution. ' + 
         'Please consider use a less strick search target, or ' +
