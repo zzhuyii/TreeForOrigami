@@ -121,7 +121,7 @@ st.subheader("Inverse Design Targets")
 
 BS30LB = st.selectbox(
      "Select lower bond of stiffness at 30% extension (N/m):",
-     [10000,100000,400000])
+     [5000,10000,100000,400000])
 
 BS30UB = st.selectbox(
      "Select upper bond of stiffness at 30% extension (N/m):",
@@ -129,7 +129,7 @@ BS30UB = st.selectbox(
 
 BS60LB = st.selectbox(
      "Select lower bond of stiffness at 60% extension (N/m):",
-     [1000,5000,10000,50000,100000])
+     [500,1000,5000,10000,50000,100000])
 
 BS60UB = st.selectbox(
      "Select upper bond of stiffness at 60% extension (N/m):",
@@ -137,7 +137,7 @@ BS60UB = st.selectbox(
 
 BS90LB = st.selectbox(
      "Select lower bond of stiffness at 90% extension (N/m):",
-     [5000,10000,40000,80000])
+     [100,500,1000,5000,10000,40000,80000])
 
 BS90UB = st.selectbox(
      "Select upper bond of stiffness at 90% extension (N/m):",
